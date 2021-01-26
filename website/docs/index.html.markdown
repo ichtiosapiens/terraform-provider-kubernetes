@@ -52,69 +52,60 @@ For specific usage examples, see the guides for [AKS](https://github.com/hashico
 
 ## Authentication
 
-There are generally two ways to configure the Kubernetes provider.
+When not running inside a cluster, the provider must be explicitly configured either using the provider block or using environment variables. There are three ways to configure the Helm provider:
+
+1. [Using a kubeconfig file](#file-config)
+2. [Supplying credentials](#credentials-config)
+3. [Using the in-cluster config](#in-cluster-config)
+4. [Exec plugins](#exec-plugins)
 
 ### File config
 
-The provider always first tries to load **a config file** from a given
-(or default) location. Depending on whether you have a current context set
-this _may_ require `config_context_auth_info` and/or `config_context_cluster`
-and/or `config_context`.
-
-#### Setting default config context
-
-Here's an example of how to set default context and avoid all provider configuration:
-
-```
-kubectl config set-context default-system \
-  --cluster=chosen-cluster \
-  --user=chosen-user
-
-kubectl config use-context default-system
-```
-
-Read [more about `kubectl` in the official docs](https://kubernetes.io/docs/user-guide/kubectl-overview/).
-
-### In-cluster service account token
-
-If no other configuration is specified, and when it detects it is running in a kubernetes pod,
-the provider will try to use the service account token from the `/var/run/secrets/kubernetes.io/serviceaccount/token` path.
-Detection of in-cluster execution is based on the sole availability of both of the `KUBERNETES_SERVICE_HOST` and `KUBERNETES_SERVICE_PORT` environment variables,
-with non-empty values.
-
-If you have any other static configuration setting specified in a config file or static configuration, in-cluster service account token will not be tried.
-
-### Statically defined credentials
-
-Another way is **statically** define TLS certificate credentials:
+The easiest way is to supply a path to your kubeconfig file using the `config_path` attribute or using the `KUBE_CONFIG_PATH` environment variable.
 
 ```hcl
 provider "kubernetes" {
-  host = "https://104.196.242.174"
-
-  client_certificate     = "${file("~/.kube/client-cert.pem")}"
-  client_key             = "${file("~/.kube/client-key.pem")}"
-  cluster_ca_certificate = "${file("~/.kube/cluster-ca-cert.pem")}"
+  config_path = "~/.kube/config"
 }
 ```
 
-or username and password (HTTP Basic Authorization):
+The provider also supports multiple paths in the same way that kubectl does.
 
 ```hcl
 provider "kubernetes" {
-  host = "https://104.196.242.174"
-
-  username = "username"
-  password = "password"
+  config_paths = [
+    "/path/to/config_a.yaml",
+    "/path/to/config_b.yaml"
+  ]
 }
 ```
 
+### Credentials config
 
+You can also **statically** define all the credentials:
+
+```hcl
+provider "kubernetes" {
+  host     = "https://104.196.242.174"
+  username = "ClusterMaster"
+  password = "MindTheGap"
+
+  client_certificate     = file("~/.kube/client-cert.pem")
+  client_key             = file("~/.kube/client-key.pem")
+  cluster_ca_certificate = file("~/.kube/cluster-ca-cert.pem")
+}
+```
 
 ~> If you have **both** valid configurations in a config file and static configuration, the static one is used as an override.
 i.e. any static field will override its counterpart loaded from the config.
 
-## Exec-based credential plugins
+
+### In-cluster Config
+
+The provider is able to detect when it is running inside a cluster, so in this case you do not need to specify any attributes in the provider block.
+
+
+## Exec plugins
 
 Some cloud providers have short-lived authentication tokens that can expire relatively quickly. To ensure the Kubernetes provider is receiving valid credentials, an exec-based plugin can be used to fetch a new token before initializing the provider. For example, on EKS, the command `eks get-token` can be used:
 
