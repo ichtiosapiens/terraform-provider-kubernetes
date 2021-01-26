@@ -52,7 +52,7 @@ For specific usage examples, see the guides for [AKS](https://github.com/hashico
 
 ## Authentication
 
-When not running inside a cluster, the provider must be explicitly configured either using the provider block or using environment variables. There are three ways to configure the Helm provider:
+When not running inside a cluster, the provider must be explicitly configured either using the provider block or using environment variables. There are four ways to configure the Helm provider:
 
 1. [Using a kubeconfig file](#file-config)
 2. [Supplying credentials](#credentials-config)
