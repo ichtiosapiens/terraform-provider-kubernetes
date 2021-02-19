@@ -776,7 +776,6 @@ func expandPodSpec(p []interface{}) (*v1.PodSpec, error) {
 	if v, ok := in["topology_spread_constraint"].([]interface{}); ok && len(v) > 0 {
 		ts, err := expandTopologySpreadConstraints(v)
 		if err != nil {
-		if err != nil {
 			return obj, err
 		}
 		for _, t := range ts {
