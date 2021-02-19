@@ -1324,7 +1324,7 @@ func expandTopologySpreadConstraints(tsc []interface{}) ([]*v1.TopologySpreadCon
 		if value, ok := m["max_skew"].(int); ok {
 			ts[i].MaxSkew = int32(value)
 		}
-		}
+	}
 	return ts, nil
 }
 

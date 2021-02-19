@@ -423,7 +423,6 @@ func podSpecFields(isUpdatable, isComputed bool) map[string]*schema.Schema {
 			},
 		},
 
-
 		"volume": {
 			Type:        schema.TypeList,
 			Optional:    true,
